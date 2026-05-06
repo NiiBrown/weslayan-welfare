@@ -1,0 +1,50 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap');
+
+:root {
+  --brand-50: #E8F0FA;
+  --brand-100: #D1DFEF;
+  --brand-500: #1B4B8A;
+  --brand-600: #15407A;
+  --brand-700: #0E3666;
+  --brand-900: #0A1B3D;
+  --gold-50: #FDF6E8;
+  --gold-400: #C8963E;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'DM Sans', 'Segoe UI', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #D0DCE8; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #6B7F99; }
+
+/* Sidebar responsive */
+@media (max-width: 768px) {
+  .sidebar {
+    transform: translateX(-100%);
+    position: fixed;
+    z-index: 50;
+  }
+  .sidebar.open {
+    transform: translateX(0);
+  }
+  .main-content {
+    margin-left: 0 !important;
+  }
+  .mobile-menu-btn {
+    display: block !important;
+  }
+}

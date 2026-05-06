@@ -1,0 +1,134 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String?   @unique
+  phone         String?   @unique
+  password      String
+  role          String    @default("member") // super_admin, admin, treasurer, member
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  member        Member?
+  auditLogs     AuditLog[]
+}
+
+model Member {
+  id              String    @id @default(cuid())
+  userId          String    @unique
+  user            User      @relation(fields: [userId], references: [id])
+  fullName        String
+  email           String?
+  phone           String
+  yearGroup       String?
+  location        String?
+  status          String    @default("active") // active, inactive, removed
+  joinDate        DateTime  @default(now())
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  dues            Due[]
+  payments        Payment[]
+  smsReminders    SmsReminder[]
+  welfareBenefits WelfareBenefit[]
+}
+
+model Due {
+  id          String   @id @default(cuid())
+  memberId    String
+  member      Member   @relation(fields: [memberId], references: [id])
+  amount      Float
+  month       String   // e.g. "2024-01"
+  status      String   @default("unpaid") // paid, unpaid, partial, exempt
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Payment {
+  id            String   @id @default(cuid())
+  memberId      String
+  member        Member   @relation(fields: [memberId], references: [id])
+  amount        Float
+  paymentDate   DateTime
+  method        String   // mobile_money, bank_transfer, cash
+  reference     String?
+  recordedBy    String   // admin user id or name
+  notes         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Expense {
+  id          String   @id @default(cuid())
+  title       String
+  amount      Float
+  date        DateTime
+  category    String   // medical, bereavement, marriage, naming_ceremony, other
+  description String?
+  receiptUrl  String?
+  approvedBy  String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model SmsReminder {
+  id          String   @id @default(cuid())
+  memberId    String
+  member      Member   @relation(fields: [memberId], references: [id])
+  phone       String
+  message     String
+  dateSent    DateTime @default(now())
+  status      String   @default("pending") // pending, delivered, failed
+  createdAt   DateTime @default(now())
+}
+
+model Announcement {
+  id        String   @id @default(cuid())
+  title     String
+  content   String
+  priority  String   @default("low") // high, medium, low
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model WelfareBenefit {
+  id          String   @id @default(cuid())
+  memberId    String
+  member      Member   @relation(fields: [memberId], references: [id])
+  type        String   // medical, bereavement, education, emergency
+  amount      Float
+  description String?
+  date        DateTime
+  status      String   @default("approved") // approved, pending, rejected
+  createdAt   DateTime @default(now())
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  action    String   // create, update, delete
+  entity    String   // member, payment, expense, etc.
+  entityId  String
+  details   String?
+  createdAt DateTime @default(now())
+}
+
+model AppSettings {
+  id              String @id @default("app_settings")
+  monthlyDues     Float  @default(200)
+  duesStartMonth  String @default("2024-01")
+  smsProvider     String @default("hubtel")
+  smsApiKey       String?
+  smsSenderId     String @default("WWA")
+  associationName String @default("Weslayan Welfare Association")
+  contactEmail    String @default("info@weslayanwelfare.org")
+  contactPhone    String @default("+233 24 412 3456")
+}
