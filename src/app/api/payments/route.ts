@@ -91,7 +91,7 @@ export async function POST(req: NextRequest) {
       data: {
         memberId,
         amount,
-        paymentDate: new Date(paymentDate || new Date()),,
+        paymentDate: new Date(paymentDate),
         method,
         reference: reference || null,
         recordedBy: recordedBy || "Admin",

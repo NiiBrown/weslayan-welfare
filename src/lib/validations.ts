@@ -53,12 +53,7 @@ export const createPaymentSchema = z.object({
     .max(1000000, "Amount seems too large — please double-check"),
   paymentDate: z
     .string()
-    .refine(
-      (d) => !isNaN(Date.parse(d)),
-      "Please enter a valid date"
-    )
-    .optional()
-    .transform((d) => d || new Date().toISOString()),
+    .default(new Date().toISOString()),
   method: z
     .enum(["mobile_money", "bank_transfer", "cash"], {
       errorMap: () => ({ message: "Payment method must be mobile_money, bank_transfer, or cash" }),
@@ -82,12 +77,7 @@ export const createExpenseSchema = z.object({
     .max(10000000, "Amount seems too large — please double-check"),
   date: z
     .string()
-    .refine(
-      (d) => !isNaN(Date.parse(d)),
-      "Please enter a valid date"
-    )
-    .optional()
-    .transform((d) => d || new Date().toISOString()),
+    .default(new Date().toISOString()),
   category: z
     .enum(["medical", "bereavement", "marriage", "naming_ceremony", "other"], {
       errorMap: () => ({ message: "Please select a valid category" }),

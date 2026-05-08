@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
     const { title, amount, date, category, description, approvedBy } = validation.data;
 
 // Sanity check: expense date shouldn't be in the far future
-    const expenseDate = new Date(date as string);
+    const expenseDate = new Date(date);
     const threeMonthsFromNow = new Date();
     threeMonthsFromNow.setMonth(threeMonthsFromNow.getMonth() + 3);
 
