@@ -96,15 +96,15 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const payment = await prisma.payment.create({
+   const payment = await prisma.payment.create({
       data: {
         memberId,
         amount,
         paymentDate: new Date(dateStr),
-        method,
-        reference: reference || null,
-        recordedBy: recordedBy || "Admin",
-        notes: notes || null,
+        method: method as string,
+        reference: (reference as string) || null,
+        recordedBy: (recordedBy as string) || "Admin",
+        notes: (notes as string) || null,
       },
     });
 

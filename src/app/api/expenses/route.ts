@@ -70,14 +70,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const expense = await prisma.expense.create({
+  const expense = await prisma.expense.create({
       data: {
         title,
         amount,
         date: expenseDate,
-        category,
-        description: description || null,
-        approvedBy: approvedBy || "Admin",
+        category: category as string,
+        description: (description as string) || null,
+        approvedBy: (approvedBy as string) || "Admin",
       },
     });
 
