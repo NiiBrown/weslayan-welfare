@@ -7,7 +7,7 @@ import {
   Home, CreditCard, Bell, User, LogOut, Menu, CheckCircle,
   AlertCircle, DollarSign, Clock, Phone, Mail, MapPin, Calendar,
 } from "lucide-react";
-import { formatCurrency, formatDate, getInitials } from "@/lib/utils";
+import { formatCurrency, formatDate, getInitials } from "@/lib/helpers";
 
 export default function MemberDashboard() {
   const { data: session, status } = useSession();
