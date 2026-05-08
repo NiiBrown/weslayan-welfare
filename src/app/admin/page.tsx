@@ -10,7 +10,7 @@ import {
   Check, Clock, AlertCircle, TrendingUp, DollarSign, CheckCircle,
   X, Filter, User, Calendar, Phone, Mail, MapPin,
 } from "lucide-react";
-import { formatCurrency, formatDate, getInitials } from "@/lib/helpers";
+import { formatCurrency, formatDate, getInitials } from "@/lib/utils";
 import { downloadCsv } from "@/lib/reports";
 
 const navItems = [
