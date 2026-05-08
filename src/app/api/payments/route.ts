@@ -1,20 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { createPaymentSchema, validateRequest } from "@/lib/validations";
 
-// GET /api/payments
 export async function GET(req: NextRequest) {
   try {
-    const searchParams = req.nextUrl.searchParams;
-    const memberId = searchParams.get("memberId");
-
+    const memberId = req.nextUrl.searchParams.get("memberId");
     const where: any = {};
-    if (memberId) {
-      if (memberId.length > 50) {
-        return NextResponse.json({ error: "Invalid member ID" }, { status: 400 });
-      }
-      where.memberId = memberId;
-    }
+    if (memberId) where.memberId = memberId;
 
     const payments = await prisma.payment.findMany({
       where,
@@ -32,7 +23,6 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// POST /api/payments
 export async function POST(req: NextRequest) {
   try {
     let body: any;
@@ -42,38 +32,24 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
     }
 
-    // Coerce amount to number if it came in as a string
-    if (typeof body.amount === "string") {
-      const parsed = parseFloat(body.amount);
-      if (isNaN(parsed)) {
-        return NextResponse.json(
-          { error: "Validation failed", details: { amount: ["Amount must be a valid number"] } },
-          { status: 422 }
-        );
-      }
-      body.amount = parsed;
+    const memberId: string = body.memberId || "";
+    const amount: number = Number(body.amount) || 0;
+    const paymentDate: string = body.paymentDate || new Date().toISOString();
+    const method: string = body.method || "cash";
+    const reference: string = body.reference || "";
+    const recordedBy: string = body.recordedBy || "Admin";
+    const notes: string = body.notes || "";
+
+    if (!memberId) {
+      return NextResponse.json({ error: "Please select a member" }, { status: 422 });
+    }
+    if (amount <= 0) {
+      return NextResponse.json({ error: "Amount must be greater than zero" }, { status: 422 });
+    }
+    if (isNaN(Date.parse(paymentDate))) {
+      return NextResponse.json({ error: "Please enter a valid payment date" }, { status: 422 });
     }
 
-    const validation = validateRequest(createPaymentSchema, body);
-    if (!validation.success) {
-      return NextResponse.json(
-        { error: "Validation failed", details: validation.errors },
-        { status: 422 }
-      );
-    }
-
-    const { memberId, amount, paymentDate, method, reference, recordedBy, notes } = validation.data;
-
-    // Runtime guard for payment date
-    const dateStr = paymentDate as string;
-    if (!dateStr || isNaN(Date.parse(dateStr))) {
-      return NextResponse.json(
-        { error: "A valid payment date is required" },
-        { status: 422 }
-      );
-    }
-
-    // Verify the member exists and is active
     const member = await prisma.member.findUnique({ where: { id: memberId } });
     if (!member) {
       return NextResponse.json({ error: "Member not found" }, { status: 404 });
@@ -85,30 +61,28 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Check for duplicate reference if provided
     if (reference) {
       const existingRef = await prisma.payment.findFirst({ where: { reference } });
       if (existingRef) {
         return NextResponse.json(
-          { error: `A payment with reference "${reference}" already exists` },
+          { error: "A payment with this reference already exists" },
           { status: 409 }
         );
       }
     }
 
-   const payment = await prisma.payment.create({
+    const payment = await prisma.payment.create({
       data: {
         memberId,
         amount,
-        paymentDate: new Date(dateStr),
-        method: method as string,
-        reference: (reference as string) || null,
-        recordedBy: (recordedBy as string) || "Admin",
-        notes: (notes as string) || null,
+        paymentDate: new Date(paymentDate),
+        method,
+        reference: reference || null,
+        recordedBy,
+        notes: notes || null,
       },
     });
 
-    // Auto-mark dues as paid
     let remaining = amount;
     const unpaidDues = await prisma.due.findMany({
       where: { memberId, status: { in: ["unpaid", "partial"] } },
@@ -133,7 +107,7 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json(
-      { message: `Payment of GHS ${amount} recorded for ${member.fullName}`, payment },
+      { message: "Payment recorded", payment },
       { status: 201 }
     );
   } catch (error: any) {
