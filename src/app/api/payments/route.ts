@@ -64,6 +64,15 @@ export async function POST(req: NextRequest) {
 
     const { memberId, amount, paymentDate, method, reference, recordedBy, notes } = validation.data;
 
+    // Runtime guard for payment date
+    const dateStr = paymentDate as string;
+    if (!dateStr || isNaN(Date.parse(dateStr))) {
+      return NextResponse.json(
+        { error: "A valid payment date is required" },
+        { status: 422 }
+      );
+    }
+
     // Verify the member exists and is active
     const member = await prisma.member.findUnique({ where: { id: memberId } });
     if (!member) {
@@ -91,7 +100,7 @@ export async function POST(req: NextRequest) {
       data: {
         memberId,
         amount,
-        paymentDate: new Date(paymentDate),
+        paymentDate: new Date(dateStr),
         method,
         reference: reference || null,
         recordedBy: recordedBy || "Admin",

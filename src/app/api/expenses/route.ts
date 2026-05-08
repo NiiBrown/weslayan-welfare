@@ -50,8 +50,16 @@ export async function POST(req: NextRequest) {
 
     const { title, amount, date, category, description, approvedBy } = validation.data;
 
-// Sanity check: expense date shouldn't be in the far future
-    const expenseDate = new Date(date);
+    // Runtime guard + sanity check
+    const dateStr = date as string;
+    if (!dateStr || isNaN(Date.parse(dateStr))) {
+      return NextResponse.json(
+        { error: "A valid date is required" },
+        { status: 422 }
+      );
+    }
+
+    const expenseDate = new Date(dateStr);
     const threeMonthsFromNow = new Date();
     threeMonthsFromNow.setMonth(threeMonthsFromNow.getMonth() + 3);
 
