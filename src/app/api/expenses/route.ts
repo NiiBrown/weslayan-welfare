@@ -48,7 +48,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { title, amount, date, category, description, approvedBy } = validation.data;
+    const validData = validation.data as { title: string; amount: number; date: string; category: string; description: string; approvedBy: string };
+    const { title, amount, date, category, description, approvedBy } = validData;
 
     // Runtime guard + sanity check
     const dateStr = date as string;
