@@ -50,8 +50,8 @@ export async function POST(req: NextRequest) {
 
     const { title, amount, date, category, description, approvedBy } = validation.data;
 
-    // Sanity check: expense date shouldn't be in the far future
-    const expenseDate = new Date(date);
+// Sanity check: expense date shouldn't be in the far future
+    const expenseDate = new Date(date || new Date());
     const threeMonthsFromNow = new Date();
     threeMonthsFromNow.setMonth(threeMonthsFromNow.getMonth() + 3);
 
